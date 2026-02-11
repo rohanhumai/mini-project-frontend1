@@ -1,113 +1,136 @@
-import Image from "next/image";
+"use client";
+
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="min-h-screen bg-gray-950">
+      {/* Navbar */}
+      <nav className="flex items-center justify-between px-6 py-4 bg-gray-900/80 backdrop-blur-md border-b border-gray-800 sticky top-0 z-50">
+        <Link
+          href="/"
+          className="text-xl font-bold text-indigo-400 flex items-center gap-2"
+        >
+          <span className="text-2xl">📋</span>
+          QR Attendance
+        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/teacher/login"
+            className="px-4 py-2 text-sm font-semibold text-gray-200 bg-gray-800 border border-gray-700 rounded-xl hover:bg-gray-700 transition-all"
           >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+            Teacher Login
+          </Link>
+          <Link
+            href="/student/register"
+            className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all"
+          >
+            Student Register
+          </Link>
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <div className="max-w-5xl mx-auto px-6 text-center py-24">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-8">
+          <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+          Anti-Proxy Attendance System
+        </div>
+
+        <h1 className="text-5xl md:text-7xl font-extrabold leading-tight mb-6">
+          <span className="bg-gradient-to-r from-indigo-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent">
+            Smart QR
+          </span>
+          <br />
+          <span className="text-gray-100">Attendance System</span>
+        </h1>
+
+        <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed">
+          Teachers generate QR codes for sessions. Students scan to mark
+          attendance. Each student gets{" "}
+          <span className="text-amber-400 font-semibold">1 token per hour</span>{" "}
+          — no more proxy!
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link
+            href="/teacher/login"
+            className="px-8 py-4 text-base font-semibold text-white bg-indigo-600 rounded-2xl hover:bg-indigo-700 shadow-lg shadow-indigo-600/25 transition-all"
+          >
+            🎓 I&apos;m a Teacher
+          </Link>
+          <Link
+            href="/student/register"
+            className="px-8 py-4 text-base font-semibold text-gray-200 bg-gray-800 border border-gray-700 rounded-2xl hover:bg-gray-700 transition-all"
+          >
+            📱 I&apos;m a Student
+          </Link>
         </div>
       </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
+      {/* Features */}
+      <div className="max-w-5xl mx-auto px-6 pb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            {
+              icon: "📱",
+              title: "QR Scanning",
+              desc: "Scan QR codes to mark attendance instantly.",
+            },
+            {
+              icon: "🔒",
+              title: "Anti-Proxy",
+              desc: "1 token per hour prevents proxy attendance.",
+            },
+            {
+              icon: "⚡",
+              title: "Redis Powered",
+              desc: "Fast caching and DDoS rate limiting.",
+            },
+            {
+              icon: "📊",
+              title: "Real-time",
+              desc: "Live attendance tracking for teachers.",
+            },
+          ].map((f, i) => (
+            <div
+              key={i}
+              className="p-8 bg-gray-900/50 border border-gray-800 rounded-2xl text-center hover:border-indigo-500/30 transition-all duration-300 group"
+            >
+              <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                {f.icon}
+              </div>
+              <h3 className="text-lg font-bold text-gray-100 mb-2">
+                {f.title}
+              </h3>
+              <p className="text-gray-400 text-sm leading-relaxed">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Demo */}
+        <div className="max-w-md mx-auto mt-16">
+          <div className="p-6 bg-gray-900/50 border border-gray-800 rounded-2xl text-center">
+            <h3 className="text-lg font-bold text-gray-100 mb-3">
+              🔑 Demo Credentials
+            </h3>
+            <div className="bg-gray-950 rounded-xl p-4 space-y-2">
+              <p className="text-gray-300 text-sm">
+                Email:{" "}
+                <code className="text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded font-mono">
+                  admin@college.edu
+                </code>
+              </p>
+              <p className="text-gray-300 text-sm">
+                Password:{" "}
+                <code className="text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded font-mono">
+                  admin123
+                </code>
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    </div>
   );
 }
