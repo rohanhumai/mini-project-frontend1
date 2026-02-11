@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
-import LoadingButton from "../../components/LoadingButton";
+import LoadingButton from "../../components/loadingButton";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
