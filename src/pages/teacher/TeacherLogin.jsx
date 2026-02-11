@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
-import LoadingButton from "../../components/LoadingButton";
+import LoadingButton from "../../components/loadingButton";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -19,10 +19,7 @@ export default function TeacherLogin() {
       const res = await axios.post(`${API}/auth/teacher/login`, form);
       if (res.data.success) {
         localStorage.setItem("token", res.data.token);
-        localStorage.setItem(
-          "teacherData",
-          JSON.stringify(res.data.teacher)
-        );
+        localStorage.setItem("teacherData", JSON.stringify(res.data.teacher));
         toast.success("Login successful!");
         navigate("/teacher/dashboard");
       }
@@ -71,9 +68,7 @@ export default function TeacherLogin() {
                   type="email"
                   placeholder="teacher@college.edu"
                   value={form.email}
-                  onChange={(e) =>
-                    setForm({ ...form, email: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
                   className={ic}
                   required
                 />
