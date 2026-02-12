@@ -181,12 +181,12 @@ export default function StudentScan() {
     return `${m}m ${sc < 10 ? "0" : ""}${sc}s`;
   };
 
-  const logout = () => {
-    stopScanning();
-    localStorage.removeItem("studentToken");
-    localStorage.removeItem("studentData");
-    router.push("/");
-  };
+  // const logout = () => {
+  //   stopScanning();
+  //   localStorage.removeItem("studentToken");
+  //   localStorage.removeItem("studentData");
+  //   router.push("/");
+  // };
 
   if (loading) {
     return (
