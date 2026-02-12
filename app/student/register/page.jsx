@@ -226,7 +226,7 @@ export default function StudentRegister() {
                     Registering...
                   </span>
                 ) : (
-                  "✅ Register & Continue"
+                  "Register & Continue"
                 )}
               </button>
             </form>
