@@ -1,103 +1,63 @@
 "use client";
-// Marks this as a Client Component (required for hooks, localStorage, camera, etc.)
 
 import { useState, useEffect, useRef, useCallback } from "react";
-// React hooks for state, lifecycle, refs, memoized functions
-
 import { useRouter } from "next/navigation";
-// Next.js navigation hook
-
 import Link from "next/link";
-// Client-side navigation
-
 import axios from "axios";
-// HTTP client
-
 import toast from "react-hot-toast";
-// Notification system
 
-// Backend API base URL
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 export default function StudentScan() {
   const router = useRouter();
-
-  // Logged-in student data
   const [student, setStudent] = useState(null);
-
-  // Token state (cooldown + availability)
   const [tokenStatus, setTokenStatus] = useState({
     hasToken: true,
     cooldownRemaining: 0,
   });
-
-  // Scanner state
   const [scanning, setScanning] = useState(false);
-
-  // Success data after attendance marked
   const [success, setSuccess] = useState(null);
-
-  // Attendance history
   const [history, setHistory] = useState([]);
-
-  // Initial loading state
   const [loading, setLoading] = useState(true);
-
-  // Toggle history accordion
   const [showHistory, setShowHistory] = useState(false);
-
-  // Manual entry state
   const [manualCode, setManualCode] = useState("");
   const [manualLoading, setManualLoading] = useState(false);
-
-  // Refs for QR scanner instance + DOM
   const scannerRef = useRef(null);
   const qrRef = useRef(null);
 
-  // Memoized function that returns Authorization header
   const auth = useCallback(() => {
     const t = localStorage.getItem("studentToken");
     return { headers: { Authorization: `Bearer ${t}` } };
   }, []);
 
-  // Initial auth + data fetch
   useEffect(() => {
     const t = localStorage.getItem("studentToken");
     const d = localStorage.getItem("studentData");
-
-    // Redirect if not authenticated
     if (!t || !d) {
       router.push("/student/register");
       return;
     }
-
     setStudent(JSON.parse(d));
-
     fetchToken();
     fetchHistory();
-
     setLoading(false);
   }, [router]);
 
-  // Cooldown countdown effect
+  // Cooldown timer
   useEffect(() => {
     if (tokenStatus.cooldownRemaining > 0) {
-      // Decrement cooldown every second
       const timer = setInterval(() => {
         setTokenStatus((p) => {
           const cd = p.cooldownRemaining - 1;
-
           return cd <= 0
             ? { hasToken: true, cooldownRemaining: 0 }
             : { ...p, cooldownRemaining: cd };
         });
       }, 1000);
-
       return () => clearInterval(timer);
     }
   }, [tokenStatus.cooldownRemaining]);
 
-  // Fetch token availability from backend
   const fetchToken = async () => {
     try {
       const res = await axios.get(`${API}/student/token-status`, auth());
@@ -107,7 +67,6 @@ export default function StudentScan() {
     }
   };
 
-  // Fetch attendance history
   const fetchHistory = async () => {
     try {
       const res = await axios.get(`${API}/attendance/my-attendance`, auth());
@@ -117,33 +76,23 @@ export default function StudentScan() {
     }
   };
 
-  // Start camera scanning
   const startScanning = async () => {
-    // Block if cooldown active
     if (!tokenStatus.hasToken) {
       toast.error("No token. Wait for cooldown.");
       return;
     }
-
     setScanning(true);
     setSuccess(null);
-
     try {
-      // Dynamically import QR scanner library
       const { Html5Qrcode } = await import("html5-qrcode");
-
-      // Small delay to ensure DOM is mounted
       await new Promise((r) => setTimeout(r, 200));
-
       if (scannerRef.current) {
         const qr = new Html5Qrcode("qr-reader");
         qrRef.current = qr;
-
         await qr.start(
-          { facingMode: "environment" }, // Use back camera
+          { facingMode: "environment" },
           { fps: 10, qrbox: { width: 250, height: 250 } },
           async (text) => {
-            // On successful scan
             await handleScan(text);
             stopScanning();
           },
@@ -157,7 +106,6 @@ export default function StudentScan() {
     }
   };
 
-  // Stop camera scanning
   const stopScanning = async () => {
     try {
       if (qrRef.current) {
@@ -170,57 +118,43 @@ export default function StudentScan() {
     setScanning(false);
   };
 
-  // Handle scanned QR data
   const handleScan = async (qrData) => {
     try {
       let parsed;
-
-      // Attempt to parse QR JSON
       try {
         parsed = JSON.parse(qrData);
       } catch {
         toast.error("Invalid QR");
         return;
       }
-
-      // Ensure sessionCode exists
       if (!parsed.sessionCode) {
         toast.error("Invalid QR format");
         return;
       }
-
       await markAttendance(parsed.sessionCode);
     } catch (err) {
       handleErr(err);
     }
   };
 
-  // Call backend to mark attendance
   const markAttendance = async (code) => {
     const res = await axios.post(
       `${API}/attendance/mark`,
       { sessionCode: code },
       auth(),
     );
-
     if (res.data.success) {
       setSuccess(res.data.attendance);
       toast.success("Attendance marked! ✅");
-
-      // Refresh token + history
       fetchToken();
       fetchHistory();
     }
   };
 
-  // Manual session code submission
   const handleManual = async (e) => {
     e.preventDefault();
-
     if (!manualCode.trim()) return;
-
     setManualLoading(true);
-
     try {
       await markAttendance(manualCode.trim());
       setManualCode("");
@@ -231,11 +165,8 @@ export default function StudentScan() {
     }
   };
 
-  // Centralized error handler
   const handleErr = (err) => {
     toast.error(err.response?.data?.message || "Failed");
-
-    // If backend returns cooldown info, update UI
     if (err.response?.data?.cooldownRemaining) {
       setTokenStatus({
         hasToken: false,
@@ -244,18 +175,268 @@ export default function StudentScan() {
     }
   };
 
-  // Format seconds into "Xm Ys"
   const fmt = (s) => {
     const m = Math.floor(s / 60);
     const sc = s % 60;
     return `${m}m ${sc < 10 ? "0" : ""}${sc}s`;
   };
 
-  // Logout logic
   const logout = () => {
     stopScanning();
     localStorage.removeItem("studentToken");
     localStorage.removeItem("studentData");
     router.push("/");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-950">
+        <div className="w-10 h-10 border-4 border-gray-700 border-t-indigo-500 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-950">
+      {/* Navbar */}
+      <nav className="flex items-center justify-between px-6 py-4 bg-gray-900/80 backdrop-blur-md border-b border-gray-800 sticky top-0 z-50">
+        <Link
+          href="/"
+          className="text-xl font-bold text-indigo-400 flex items-center gap-2"
+        >
+          <span className="text-2xl">📋</span>QR Attendance
+        </Link>
+        <div className="flex items-center gap-3">
+          <div
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border ${
+              tokenStatus.hasToken
+                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+            }`}
+          >
+            {tokenStatus.hasToken
+              ? "🟢 Token Ready"
+              : `⏳ ${fmt(tokenStatus.cooldownRemaining)}`}
+          </div>
+          <button
+            onClick={logout}
+            className="px-4 py-2 text-sm font-semibold text-gray-200 bg-gray-800 border border-gray-700 rounded-xl hover:bg-gray-700 transition-all"
+          >
+            Logout
+          </button>
+        </div>
+      </nav>
+
+      <div className="max-w-xl mx-auto px-6 py-8">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-100">
+            📱 Scan Attendance
+          </h1>
+          <p className="text-gray-400 text-sm mt-1">
+            {student?.name} • {student?.rollNumber} • {student?.department}
+          </p>
+        </div>
+
+        {/* Token Status */}
+        <div
+          className={`p-5 bg-gray-900/50 border rounded-2xl mb-6 border-l-4 ${
+            tokenStatus.hasToken
+              ? "border-gray-800 border-l-emerald-500"
+              : "border-gray-800 border-l-amber-500"
+          }`}
+        >
+          <div className="flex justify-between items-center">
+            <div>
+              <h4 className="text-sm font-bold text-gray-100">Token Status</h4>
+              <p className="text-gray-400 text-xs mt-1">
+                {tokenStatus.hasToken
+                  ? "Token available. Scan a QR code."
+                  : `Cooldown: ${fmt(tokenStatus.cooldownRemaining)}`}
+              </p>
+            </div>
+            <div
+              className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl ${
+                tokenStatus.hasToken ? "bg-emerald-500/10" : "bg-amber-500/10"
+              }`}
+            >
+              {tokenStatus.hasToken ? "✅" : "⏳"}
+            </div>
+          </div>
+          {!tokenStatus.hasToken && (
+            <div className="mt-4">
+              <div className="w-full bg-gray-700 rounded-full h-2">
+                <div
+                  className="bg-amber-500 h-2 rounded-full transition-all duration-1000"
+                  style={{
+                    width: `${
+                      ((3600 - tokenStatus.cooldownRemaining) / 3600) * 100
+                    }%`,
+                  }}
+                />
+              </div>
+              <p className="text-gray-500 text-xs mt-2 text-right">
+                {fmt(tokenStatus.cooldownRemaining)} left
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Success */}
+        {success && (
+          <div className="p-8 bg-gray-900/50 border border-gray-800 rounded-2xl mb-6 text-center">
+            <div className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center text-4xl text-white mx-auto mb-4 animate-bounce">
+              ✓
+            </div>
+            <h3 className="text-xl font-bold text-emerald-400">
+              Attendance Marked!
+            </h3>
+            <p className="text-gray-300 mt-2">
+              Subject:{" "}
+              <span className="text-gray-100 font-semibold">
+                {success.subject}
+              </span>
+            </p>
+            <p className="text-gray-500 text-xs mt-1">
+              Time: {new Date(success.markedAt).toLocaleTimeString()}
+            </p>
+            <button
+              onClick={() => setSuccess(null)}
+              className="mt-6 px-6 py-2.5 text-sm font-semibold text-gray-200 bg-gray-800 border border-gray-700 rounded-xl hover:bg-gray-700 transition-all"
+            >
+              Done
+            </button>
+          </div>
+        )}
+
+        {/* Scanner */}
+        {!success && (
+          <div className="bg-gray-900/50 border border-gray-800 rounded-2xl overflow-hidden mb-6">
+            {!scanning ? (
+              <div className="p-10 text-center">
+                <div className="w-24 h-24 bg-indigo-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                  <span className="text-5xl">📷</span>
+                </div>
+                <h3 className="text-lg font-bold text-gray-100 mb-2">
+                  Ready to Scan
+                </h3>
+                <p className="text-gray-400 text-sm mb-8 max-w-xs mx-auto">
+                  Point camera at the QR code from your teacher
+                </p>
+                <button
+                  onClick={startScanning}
+                  disabled={!tokenStatus.hasToken}
+                  className={`px-8 py-4 text-base font-semibold rounded-2xl transition-all ${
+                    tokenStatus.hasToken
+                      ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                      : "bg-gray-800 text-gray-400 border border-gray-700 cursor-not-allowed"
+                  }`}
+                >
+                  {tokenStatus.hasToken
+                    ? "📱 Start Scanning"
+                    : "⏳ Cooldown Active"}
+                </button>
+              </div>
+            ) : (
+              <div>
+                <div id="qr-reader" ref={scannerRef} className="w-full" />
+                <div className="p-4">
+                  <button
+                    onClick={stopScanning}
+                    className="w-full px-6 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-all"
+                  >
+                    ⏹ Stop Scanner
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Manual Entry */}
+        {!success && !scanning && tokenStatus.hasToken && (
+          <div className="p-5 bg-gray-900/50 border border-gray-800 rounded-2xl mb-6">
+            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+              Or enter session code manually
+            </h4>
+            <form onSubmit={handleManual} className="flex gap-3">
+              <input
+                type="text"
+                placeholder="Paste session code"
+                value={manualCode}
+                onChange={(e) => setManualCode(e.target.value)}
+                className="flex-1 px-4 py-2.5 bg-gray-950 border border-gray-700 rounded-xl text-gray-100 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+              />
+              <button
+                type="submit"
+                disabled={manualLoading}
+                className="px-5 py-2.5 text-sm font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-all"
+              >
+                {manualLoading ? "..." : "Submit"}
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* History */}
+        <div>
+          <button
+            onClick={() => setShowHistory(!showHistory)}
+            className="w-full flex items-center justify-between p-4 bg-gray-900/50 border border-gray-800 rounded-2xl hover:border-gray-700 transition-all"
+          >
+            <span className="text-sm font-semibold text-gray-200">
+              📚 History ({history.length})
+            </span>
+            <svg
+              className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${
+                showHistory ? "rotate-180" : ""
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+
+          {showHistory && (
+            <div className="mt-2 p-4 bg-gray-900/50 border border-gray-800 rounded-2xl">
+              {history.length === 0 ? (
+                <p className="text-center text-gray-400 text-sm py-8">
+                  No records yet
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {history.map((r) => (
+                    <div
+                      key={r._id}
+                      className="flex items-center justify-between p-4 bg-gray-950/50 rounded-xl border border-gray-800/30"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-gray-100">
+                          {r.subject}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {r.teacher?.name} •{" "}
+                          {new Date(r.markedAt).toLocaleString()}
+                        </p>
+                      </div>
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        ✅ {r.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
