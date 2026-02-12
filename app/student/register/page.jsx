@@ -46,7 +46,7 @@ export default function StudentRegister() {
     } catch (err) {
       if (err.response?.data?.deviceLocked) {
         toast.error(
-          "❌ This account is locked to another device! Contact admin.",
+          "This account is locked to another device! Contact admin.",
           { duration: 6000 },
         );
       } else {
