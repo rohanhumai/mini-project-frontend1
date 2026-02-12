@@ -16,7 +16,7 @@ export default function Home() {
         </Link>
         <div className="flex items-center gap-3">
           <Link
-            href="/teacher/login"
+            href="/auth/teacher/login"
             className="px-4 py-2 text-sm font-semibold text-gray-200 bg-gray-800 border border-gray-700 rounded-xl hover:bg-gray-700 transition-all"
           >
             Teacher Login
