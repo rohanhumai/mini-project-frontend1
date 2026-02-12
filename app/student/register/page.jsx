@@ -231,12 +231,12 @@ export default function StudentRegister() {
               </button>
             </form>
 
-            <div className="mt-6 p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl">
+            {/* <div className="mt-6 p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl">
               <p className="text-xs text-amber-400 text-center">
                 Your account will be locked to this device. You cannot login
                 from another device.
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
