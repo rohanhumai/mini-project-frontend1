@@ -37,7 +37,7 @@ export default function TeacherDashboard() {
     const t = localStorage.getItem("token");
     const d = localStorage.getItem("teacherData");
     if (!t || !d) {
-      router.push("/login");
+      router.push("/teacher/login");
       return;
     }
     setTeacher(JSON.parse(d));
@@ -54,7 +54,7 @@ export default function TeacherDashboard() {
       setSessions(a.data.sessions || []);
       setAllSessions(b.data.sessions || []);
     } catch (err) {
-      if (err.response?.status === 401) router.push("/login");
+      if (err.response?.status === 401) router.push("/teacher/login");
     }
   };
 
