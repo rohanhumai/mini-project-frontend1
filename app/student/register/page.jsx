@@ -62,11 +62,11 @@ export default function StudentRegister() {
   const departments = [
     "Computer Engineering",
     "Artificial Intelligence & Machine Learning",
+    "Information Technology",
     "Electronical Computer Science",
     "Mechanical Engineering",
     "Civil Engineering",
     "Electrical Engineering",
-    "IT",
   ];
 
   return (
