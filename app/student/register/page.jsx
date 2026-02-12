@@ -101,7 +101,7 @@ export default function StudentRegister() {
               </p>
               {fp && (
                 <p className="text-gray-600 text-xs mt-2">
-                  🔒 Device: {fp.substring(0, 8)}...
+                  Device: {fp.substring(0, 8)}...
                 </p>
               )}
             </div>
