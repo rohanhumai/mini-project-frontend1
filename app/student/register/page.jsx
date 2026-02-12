@@ -60,11 +60,12 @@ export default function StudentRegister() {
   const ic =
     "w-full px-4 py-3 bg-gray-950 border border-gray-700 rounded-xl text-gray-100 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all";
   const departments = [
-    "Computer Science",
-    "Electronics",
-    "Mechanical",
-    "Civil",
-    "Electrical",
+    "Computer Engineering",
+    "Artificial Intelligence & Machine Learning",
+    "Electronical Computer Science",
+    "Mechanical Engineering",
+    "Civil Engineering",
+    "Electrical Engineering",
     "IT",
   ];
 
