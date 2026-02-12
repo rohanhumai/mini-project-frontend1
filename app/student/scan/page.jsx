@@ -199,12 +199,12 @@ export default function StudentScan() {
     const sc = s % 60;
     return `${m}m ${sc < 10 ? "0" : ""}${sc}s`;
   };
-  // const logout = () => {
-  //   stopScanning();
-  //   localStorage.removeItem("studentToken");
-  //   localStorage.removeItem("studentData");
-  //   router.push("/");
-  // };
+  const logout = () => {
+    stopScanning();
+    localStorage.removeItem("studentToken");
+    localStorage.removeItem("studentData");
+    router.push("/");
+  };
 
   if (loading)
     return (
@@ -230,12 +230,12 @@ export default function StudentScan() {
               ? "🟢 Token Ready"
               : `⏳ ${fmt(tokenStatus.cooldownRemaining)}`}
           </div>
-          {/* <button
+          <button
             onClick={logout}
             className="px-4 py-2 text-sm font-semibold text-gray-200 bg-gray-800 border border-gray-700 rounded-xl hover:bg-gray-700 transition-all"
           >
             Logout
-          </button> */}
+          </button>
         </div>
       </nav>
 

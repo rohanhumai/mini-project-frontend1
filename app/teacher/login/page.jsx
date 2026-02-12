@@ -31,7 +31,7 @@ export default function TeacherLogin() {
     }
   };
 
-  const inputClass =
+  const ic =
     "w-full px-4 py-3 bg-gray-950 border border-gray-700 rounded-xl text-gray-100 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all";
 
   return (
@@ -77,11 +77,10 @@ export default function TeacherLogin() {
                   placeholder="teacher@college.edu"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className={inputClass}
+                  className={ic}
                   required
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Password
@@ -93,11 +92,10 @@ export default function TeacherLogin() {
                   onChange={(e) =>
                     setForm({ ...form, password: e.target.value })
                   }
-                  className={inputClass}
+                  className={ic}
                   required
                 />
               </div>
-
               <button
                 type="submit"
                 disabled={loading}
