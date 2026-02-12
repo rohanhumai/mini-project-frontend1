@@ -1,12 +1,42 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import axios from "axios";
+import toast from "react-hot-toast";
 
-export default function Home() {
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
+export default function TeacherLogin() {
+  const router = useRouter();
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await axios.post(`${API}/auth/teacher/login`, form);
+      if (res.data.success) {
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("teacherData", JSON.stringify(res.data.teacher));
+        toast.success("Login successful!");
+        router.push("/teacher/dashboard");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const ic =
+    "w-full px-4 py-3 bg-gray-950 border border-gray-700 rounded-xl text-gray-100 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all";
+
   return (
     <div className="min-h-screen bg-gray-950">
-      {/* Navbar */}
-      <nav className="flex items-center justify-between px-6 py-4 bg-gray-900/80 backdrop-blur-md border-b border-gray-800 sticky top-0 z-50">
+      <nav className="flex items-center justify-between px-6 py-4 bg-gray-900/80 backdrop-blur-md border-b border-gray-800">
         <Link
           href="/"
           className="text-xl font-bold text-indigo-400 flex items-center gap-2"
@@ -14,118 +44,93 @@ export default function Home() {
           <span className="text-2xl">📋</span>
           QR Attendance
         </Link>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/teacher/login"
-            className="px-4 py-2 text-sm font-semibold text-gray-200 bg-gray-800 border border-gray-700 rounded-xl hover:bg-gray-700 transition-all"
-          >
-            Teacher Login
-          </Link>
-          <Link
-            href="/student/register"
-            className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all"
-          >
-            Student Register
-          </Link>
-        </div>
+        <Link
+          href="/student/register"
+          className="px-4 py-2 text-sm font-semibold text-gray-200 bg-gray-800 border border-gray-700 rounded-xl hover:bg-gray-700 transition-all"
+        >
+          Student Register
+        </Link>
       </nav>
 
-      {/* Hero */}
-      <div className="max-w-5xl mx-auto px-6 text-center py-24">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-8">
-          <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
-          Anti-Proxy Attendance System
-        </div>
-
-        <h1 className="text-5xl md:text-7xl font-extrabold leading-tight mb-6">
-          <span className="bg-gradient-to-r from-indigo-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent">
-            Smart QR
-          </span>
-          <br />
-          <span className="text-gray-100">Attendance System</span>
-        </h1>
-
-        <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed">
-          Teachers generate QR codes for sessions. Students scan to mark
-          attendance. Each student gets{" "}
-          <span className="text-amber-400 font-semibold">1 token per hour</span>{" "}
-          — no more proxy!
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link
-            href="/teacher/login"
-            className="px-8 py-4 text-base font-semibold text-white bg-indigo-600 rounded-2xl hover:bg-indigo-700 shadow-lg shadow-indigo-600/25 transition-all"
-          >
-            🎓 I&apos;m a Teacher
-          </Link>
-          <Link
-            href="/student/register"
-            className="px-8 py-4 text-base font-semibold text-gray-200 bg-gray-800 border border-gray-700 rounded-2xl hover:bg-gray-700 transition-all"
-          >
-            📱 I&apos;m a Student
-          </Link>
-        </div>
-      </div>
-
-      {/* Features */}
-      <div className="max-w-5xl mx-auto px-6 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            {
-              icon: "📱",
-              title: "QR Scanning",
-              desc: "Scan QR codes to mark attendance instantly.",
-            },
-            {
-              icon: "🔒",
-              title: "Anti-Proxy",
-              desc: "1 token per hour prevents proxy attendance.",
-            },
-            {
-              icon: "⚡",
-              title: "Redis Powered",
-              desc: "Fast caching and DDoS rate limiting.",
-            },
-            {
-              icon: "📊",
-              title: "Real-time",
-              desc: "Live attendance tracking for teachers.",
-            },
-          ].map((f, i) => (
-            <div
-              key={i}
-              className="p-8 bg-gray-900/50 border border-gray-800 rounded-2xl text-center hover:border-indigo-500/30 transition-all duration-300 group"
-            >
-              <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                {f.icon}
+      <div className="flex items-center justify-center px-6 py-20">
+        <div className="w-full max-w-md">
+          <div className="p-8 bg-gray-900/50 border border-gray-800 rounded-2xl">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">🎓</span>
               </div>
-              <h3 className="text-lg font-bold text-gray-100 mb-2">
-                {f.title}
-              </h3>
-              <p className="text-gray-400 text-sm leading-relaxed">{f.desc}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Demo */}
-        <div className="max-w-md mx-auto mt-16">
-          <div className="p-6 bg-gray-900/50 border border-gray-800 rounded-2xl text-center">
-            <h3 className="text-lg font-bold text-gray-100 mb-3">
-              🔑 Demo Credentials
-            </h3>
-            <div className="bg-gray-950 rounded-xl p-4 space-y-2">
-              <p className="text-gray-300 text-sm">
-                Email:{" "}
-                <code className="text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded font-mono">
-                  admin@college.edu
-                </code>
+              <h2 className="text-2xl font-bold text-gray-100">
+                Teacher Login
+              </h2>
+              <p className="text-gray-400 text-sm mt-1">
+                Sign in to manage attendance
               </p>
-              <p className="text-gray-300 text-sm">
-                Password:{" "}
-                <code className="text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded font-mono">
-                  admin123
-                </code>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  placeholder="teacher@college.edu"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className={ic}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  placeholder="Enter password"
+                  value={form.password}
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
+                  className={ic}
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      />
+                    </svg>
+                    Signing in...
+                  </span>
+                ) : (
+                  "Sign In"
+                )}
+              </button>
+            </form>
+
+            <div className="mt-6 p-4 bg-gray-950/50 rounded-xl border border-gray-800/50">
+              <p className="text-xs text-gray-400 text-center">
+                <span className="font-semibold text-gray-300">Demo:</span>{" "}
+                admin@college.edu / admin123
               </p>
             </div>
           </div>

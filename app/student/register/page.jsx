@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { getFingerprint, getRegisterHeaders } from "../../utils/fingerprint";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 export default function StudentRegister() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [fp, setFp] = useState(null);
   const [form, setForm] = useState({
     name: "",
     rollNumber: "",
@@ -22,16 +24,19 @@ export default function StudentRegister() {
 
   useEffect(() => {
     if (localStorage.getItem("studentToken")) router.push("/student/scan");
+    getFingerprint().then(setFp);
   }, [router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post(`${API}/auth/student/register`, {
-        ...form,
-        year: parseInt(form.year),
-      });
+      const headers = await getRegisterHeaders();
+      const res = await axios.post(
+        `${API}/auth/student/register`,
+        { ...form, year: parseInt(form.year) },
+        headers,
+      );
       if (res.data.success) {
         localStorage.setItem("studentToken", res.data.token);
         localStorage.setItem("studentData", JSON.stringify(res.data.student));
@@ -39,7 +44,14 @@ export default function StudentRegister() {
         router.push("/student/scan");
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Registration failed");
+      if (err.response?.data?.deviceLocked) {
+        toast.error(
+          "❌ This account is locked to another device! Contact admin.",
+          { duration: 6000 },
+        );
+      } else {
+        toast.error(err.response?.data?.message || "Registration failed");
+      }
     } finally {
       setLoading(false);
     }
@@ -47,6 +59,14 @@ export default function StudentRegister() {
 
   const ic =
     "w-full px-4 py-3 bg-gray-950 border border-gray-700 rounded-xl text-gray-100 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all";
+  const departments = [
+    "Computer Science",
+    "Electronics",
+    "Mechanical",
+    "Civil",
+    "Electrical",
+    "IT",
+  ];
 
   return (
     <div className="min-h-screen bg-gray-950">
@@ -55,10 +75,10 @@ export default function StudentRegister() {
           href="/"
           className="text-xl font-bold text-indigo-400 flex items-center gap-2"
         >
-          <span className="text-2xl">📋</span>QR Attendance
+          <span className="text-2xl">📋</span> QR Attendance
         </Link>
         <Link
-          href="/teacher/login"
+          href="/login"
           className="px-4 py-2 text-sm font-semibold text-gray-200 bg-gray-800 border border-gray-700 rounded-xl hover:bg-gray-700 transition-all"
         >
           Teacher Login
@@ -78,6 +98,11 @@ export default function StudentRegister() {
               <p className="text-gray-400 text-sm mt-1">
                 Fill details to mark attendance
               </p>
+              {fp && (
+                <p className="text-gray-600 text-xs mt-2">
+                  🔒 Device: {fp.substring(0, 8)}...
+                </p>
+              )}
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -136,14 +161,7 @@ export default function StudentRegister() {
                     required
                   >
                     <option value="">Select</option>
-                    {[
-                      "Computer Science",
-                      "Electronics",
-                      "Mechanical",
-                      "Civil",
-                      "Electrical",
-                      "IT",
-                    ].map((d) => (
+                    {departments.map((d) => (
                       <option key={d} value={d}>
                         {d}
                       </option>
@@ -211,6 +229,13 @@ export default function StudentRegister() {
                 )}
               </button>
             </form>
+
+            <div className="mt-6 p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl">
+              <p className="text-xs text-amber-400 text-center">
+                🔒 Your account will be locked to this device. You cannot login
+                from another device.
+              </p>
+            </div>
           </div>
         </div>
       </div>
