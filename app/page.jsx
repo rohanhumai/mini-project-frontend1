@@ -16,7 +16,7 @@ export default function Home() {
         </Link>
         <div className="flex items-center gap-3">
           <Link
-            href="/login"
+            href="/teacher/login"
             className="px-4 py-2 text-sm font-semibold text-gray-200 bg-gray-800 border border-gray-700 rounded-xl hover:bg-gray-700 transition-all"
           >
             Teacher Login
@@ -83,7 +83,7 @@ export default function Home() {
               </li>
             </ul>
             <Link
-              href="/login"
+              href="/teacher/login"
               className="block w-full px-6 py-3.5 text-center font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 transition-all"
             >
               Teacher Login →

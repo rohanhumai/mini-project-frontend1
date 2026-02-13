@@ -1,6 +1,28 @@
 import FingerprintJS from "@fingerprintjs/fingerprintjs";
 
 let cachedFingerprint = null;
+const INSTALLATION_KEY = "device_installation_id";
+
+function getInstallationId() {
+  let id = localStorage.getItem(INSTALLATION_KEY);
+  if (!id) {
+    id =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+    localStorage.setItem(INSTALLATION_KEY, id);
+  }
+  return id;
+}
+
+function simpleHash(input) {
+  let hash = 2166136261;
+  for (let i = 0; i < input.length; i += 1) {
+    hash ^= input.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return Math.abs(hash >>> 0).toString(36);
+}
 
 export async function getFingerprint() {
   if (cachedFingerprint) return cachedFingerprint;
@@ -16,8 +38,9 @@ export async function getFingerprint() {
       navigator.userAgent +
       screen.width +
       screen.height +
-      new Date().getTimezoneOffset();
-    cachedFingerprint = btoa(fallback).substring(0, 32);
+      new Date().getTimezoneOffset() +
+      getInstallationId();
+    cachedFingerprint = `fallback_${simpleHash(fallback)}`;
     return cachedFingerprint;
   }
 }
