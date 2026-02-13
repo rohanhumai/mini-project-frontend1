@@ -24,7 +24,12 @@ export async function getFingerprint() {
 
 export async function getStudentHeaders() {
   const fp = await getFingerprint();
-  const token = localStorage.getItem("studentToken");
+  const token = localStorage.getItem("studentToken")?.trim();
+
+  if (!token || token === "undefined" || token === "null") {
+    throw new Error("Missing student token");
+  }
+
   return {
     headers: {
       Authorization: `Bearer ${token}`,

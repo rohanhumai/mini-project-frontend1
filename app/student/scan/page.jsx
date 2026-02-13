@@ -27,14 +27,21 @@ export default function StudentScan() {
   const scannerRef = useRef(null);
   const qrRef = useRef(null);
 
+  const handleAuthFailure = useCallback(() => {
+    localStorage.removeItem("studentToken");
+    localStorage.removeItem("studentData");
+    toast.error("Session expired. Please register/login again.");
+    router.push("/student/register");
+  }, [router]);
+
   const auth = useCallback(async () => {
     return await getStudentHeaders();
   }, []);
 
   useEffect(() => {
-    const t = localStorage.getItem("studentToken");
+    const t = localStorage.getItem("studentToken")?.trim();
     const d = localStorage.getItem("studentData");
-    if (!t || !d) {
+    if (!t || t === "undefined" || t === "null" || !d) {
       router.push("/student/register");
       return;
     }
@@ -69,6 +76,10 @@ export default function StudentScan() {
       const res = await axios.get(`${API}/student/token-status`, h);
       setTokenStatus(res.data);
     } catch (err) {
+      if (err.response?.status === 401) {
+        handleAuthFailure();
+        return;
+      }
       console.error(err);
     }
   };
@@ -79,6 +90,10 @@ export default function StudentScan() {
       const res = await axios.get(`${API}/attendance/my-attendance`, h);
       setHistory(res.data.attendance || []);
     } catch (err) {
+      if (err.response?.status === 401) {
+        handleAuthFailure();
+        return;
+      }
       console.error(err);
     }
   };
@@ -149,7 +164,13 @@ export default function StudentScan() {
   };
 
   const markAttendance = async (code) => {
-    const h = await auth();
+    let h;
+    try {
+      h = await auth();
+    } catch {
+      handleAuthFailure();
+      return;
+    }
     const res = await axios.post(
       `${API}/attendance/mark`,
       { sessionCode: code },
@@ -178,6 +199,11 @@ export default function StudentScan() {
   };
 
   const handleErr = (err) => {
+    if (err.response?.status === 401) {
+      handleAuthFailure();
+      return;
+    }
+
     const msg = err.response?.data?.message || "Failed";
     if (err.response?.data?.registeredDevice) {
       toast.error("❌ Wrong device! Account locked to another device.", {
