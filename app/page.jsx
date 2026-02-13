@@ -36,7 +36,6 @@ export default function Home() {
           <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
           Anti-Proxy Attendance System
         </div>
-
         <h1 className="text-5xl md:text-7xl font-extrabold leading-tight mb-6">
           <span className="bg-gradient-to-r from-indigo-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent">
             Smart QR
@@ -44,7 +43,6 @@ export default function Home() {
           <br />
           <span className="text-gray-100">Attendance System</span>
         </h1>
-
         <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-16 leading-relaxed">
           Teachers generate QR codes for sessions. Students scan to mark
           attendance. Each student gets{" "}
@@ -55,7 +53,6 @@ export default function Home() {
           </span>{" "}
           — no more proxy!
         </p>
-
         {/* Two Login Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto mb-20">
           {/* Teacher Card */}
@@ -83,7 +80,7 @@ export default function Home() {
               </li>
             </ul>
             <Link
-              href="/login"
+              href="/teacher/login"
               className="block w-full px-6 py-3.5 text-center font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 transition-all"
             >
               Teacher Login →
@@ -124,7 +121,6 @@ export default function Home() {
             </Link>
           </div>
         </div>
-
         {/* Features */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           {[
@@ -163,7 +159,6 @@ export default function Home() {
             </div>
           ))}
         </div>
-
         {/* How It Works */}
         <div className="max-w-3xl mx-auto mb-16">
           <h2 className="text-2xl font-bold text-gray-100 mb-8">
@@ -209,7 +204,6 @@ export default function Home() {
             ))}
           </div>
         </div>
-
         {/* Security Features */}
         <div className="max-w-2xl mx-auto mb-16">
           <div className="p-6 bg-red-500/5 border border-red-500/20 rounded-2xl">
@@ -265,7 +259,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-
         {/* Demo Credentials */}
         <div className="max-w-md mx-auto mb-16">
           <div className="p-6 bg-gray-900/50 border border-gray-800 rounded-2xl text-center">
@@ -295,7 +288,18 @@ export default function Home() {
             </p>
           </div>
         </div>
-
+        {/* /* Admin Access */}
+        {/* <div className="max-w-md mx-auto mb-16">
+          <Link
+            href="/admin/login"
+            className="block p-4 bg-red-500/5 border border-red-500/20 rounded-2xl text-center hover:border-red-500/40 transition-all"
+          >
+            <p className="text-red-400 text-sm font-semibold">🛡️ Admin Panel</p>
+            <p className="text-gray-500 text-xs mt-1">
+              Authorized personnel only
+            </p>
+          </Link>
+        </div> */}
         {/* Footer */}
         <div className="border-t border-gray-800 pt-8 pb-12">
           <p className="text-gray-600 text-sm">
