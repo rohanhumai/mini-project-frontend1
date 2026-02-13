@@ -6,7 +6,7 @@ import Link from "next/link";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 export default function StudentRegister() {
   const router = useRouter();
@@ -28,7 +28,7 @@ export default function StudentRegister() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post(`${API_URL}/auth/student/register`, {
+      const res = await axios.post(`${API}/auth/student/register`, {
         ...form,
         year: parseInt(form.year),
       });
@@ -38,8 +38,8 @@ export default function StudentRegister() {
         toast.success(res.data.message);
         router.push("/student/scan");
       }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Registration failed");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -187,7 +187,7 @@ export default function StudentRegister() {
                 className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {loading ? (
-                  <>
+                  <span className="flex items-center gap-2">
                     <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
                       <circle
                         className="opacity-25"
@@ -205,7 +205,7 @@ export default function StudentRegister() {
                       />
                     </svg>
                     Registering...
-                  </>
+                  </span>
                 ) : (
                   "✅ Register & Continue"
                 )}

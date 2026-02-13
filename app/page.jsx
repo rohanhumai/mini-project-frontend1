@@ -5,6 +5,7 @@ import Link from "next/link";
 export default function Home() {
   return (
     <div className="min-h-screen bg-gray-950">
+      {/* Navbar */}
       <nav className="flex items-center justify-between px-6 py-4 bg-gray-900/80 backdrop-blur-md border-b border-gray-800 sticky top-0 z-50">
         <Link
           href="/"
@@ -29,6 +30,7 @@ export default function Home() {
         </div>
       </nav>
 
+      {/* Hero */}
       <div className="max-w-5xl mx-auto px-6 text-center py-24">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-8">
           <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
@@ -66,6 +68,7 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Features */}
       <div className="max-w-5xl mx-auto px-6 pb-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
@@ -105,6 +108,7 @@ export default function Home() {
           ))}
         </div>
 
+        {/* Demo */}
         <div className="max-w-md mx-auto mt-16">
           <div className="p-6 bg-gray-900/50 border border-gray-800 rounded-2xl text-center">
             <h3 className="text-lg font-bold text-gray-100 mb-3">

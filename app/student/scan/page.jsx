@@ -6,7 +6,7 @@ import Link from "next/link";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 export default function StudentScan() {
   const router = useRouter();
@@ -25,27 +25,28 @@ export default function StudentScan() {
   const scannerRef = useRef(null);
   const qrRef = useRef(null);
 
-  const headers = useCallback(() => {
-    const token = localStorage.getItem("studentToken");
-    return { headers: { Authorization: `Bearer ${token}` } };
+  const auth = useCallback(() => {
+    const t = localStorage.getItem("studentToken");
+    return { headers: { Authorization: `Bearer ${t}` } };
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem("studentToken");
-    const data = localStorage.getItem("studentData");
-    if (!token || !data) {
+    const t = localStorage.getItem("studentToken");
+    const d = localStorage.getItem("studentData");
+    if (!t || !d) {
       router.push("/student/register");
       return;
     }
-    setStudent(JSON.parse(data));
+    setStudent(JSON.parse(d));
     fetchToken();
     fetchHistory();
     setLoading(false);
   }, [router]);
 
+  // Cooldown timer
   useEffect(() => {
     if (tokenStatus.cooldownRemaining > 0) {
-      const t = setInterval(() => {
+      const timer = setInterval(() => {
         setTokenStatus((p) => {
           const cd = p.cooldownRemaining - 1;
           return cd <= 0
@@ -53,13 +54,13 @@ export default function StudentScan() {
             : { ...p, cooldownRemaining: cd };
         });
       }, 1000);
-      return () => clearInterval(t);
+      return () => clearInterval(timer);
     }
   }, [tokenStatus.cooldownRemaining]);
 
   const fetchToken = async () => {
     try {
-      const res = await axios.get(`${API_URL}/student/token-status`, headers());
+      const res = await axios.get(`${API}/student/token-status`, auth());
       setTokenStatus(res.data);
     } catch (err) {
       console.error(err);
@@ -68,10 +69,7 @@ export default function StudentScan() {
 
   const fetchHistory = async () => {
     try {
-      const res = await axios.get(
-        `${API_URL}/attendance/my-attendance`,
-        headers(),
-      );
+      const res = await axios.get(`${API}/attendance/my-attendance`, auth());
       setHistory(res.data.attendance || []);
     } catch (err) {
       console.error(err);
@@ -141,9 +139,9 @@ export default function StudentScan() {
 
   const markAttendance = async (code) => {
     const res = await axios.post(
-      `${API_URL}/attendance/mark`,
+      `${API}/attendance/mark`,
       { sessionCode: code },
-      headers(),
+      auth(),
     );
     if (res.data.success) {
       setSuccess(res.data.attendance);
@@ -190,15 +188,17 @@ export default function StudentScan() {
     router.push("/");
   };
 
-  if (loading)
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-950">
         <div className="w-10 h-10 border-4 border-gray-700 border-t-indigo-500 rounded-full animate-spin" />
       </div>
     );
+  }
 
   return (
     <div className="min-h-screen bg-gray-950">
+      {/* Navbar */}
       <nav className="flex items-center justify-between px-6 py-4 bg-gray-900/80 backdrop-blur-md border-b border-gray-800 sticky top-0 z-50">
         <Link
           href="/"
@@ -208,7 +208,11 @@ export default function StudentScan() {
         </Link>
         <div className="flex items-center gap-3">
           <div
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border ${tokenStatus.hasToken ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20"}`}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border ${
+              tokenStatus.hasToken
+                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+            }`}
           >
             {tokenStatus.hasToken
               ? "🟢 Token Ready"
@@ -224,6 +228,7 @@ export default function StudentScan() {
       </nav>
 
       <div className="max-w-xl mx-auto px-6 py-8">
+        {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-100">
             📱 Scan Attendance
@@ -235,7 +240,11 @@ export default function StudentScan() {
 
         {/* Token Status */}
         <div
-          className={`p-5 bg-gray-900/50 border rounded-2xl mb-6 border-l-4 ${tokenStatus.hasToken ? "border-gray-800 border-l-emerald-500" : "border-gray-800 border-l-amber-500"}`}
+          className={`p-5 bg-gray-900/50 border rounded-2xl mb-6 border-l-4 ${
+            tokenStatus.hasToken
+              ? "border-gray-800 border-l-emerald-500"
+              : "border-gray-800 border-l-amber-500"
+          }`}
         >
           <div className="flex justify-between items-center">
             <div>
@@ -247,7 +256,9 @@ export default function StudentScan() {
               </p>
             </div>
             <div
-              className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl ${tokenStatus.hasToken ? "bg-emerald-500/10" : "bg-amber-500/10"}`}
+              className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl ${
+                tokenStatus.hasToken ? "bg-emerald-500/10" : "bg-amber-500/10"
+              }`}
             >
               {tokenStatus.hasToken ? "✅" : "⏳"}
             </div>
@@ -258,7 +269,9 @@ export default function StudentScan() {
                 <div
                   className="bg-amber-500 h-2 rounded-full transition-all duration-1000"
                   style={{
-                    width: `${((3600 - tokenStatus.cooldownRemaining) / 3600) * 100}%`,
+                    width: `${
+                      ((3600 - tokenStatus.cooldownRemaining) / 3600) * 100
+                    }%`,
                   }}
                 />
               </div>
@@ -313,7 +326,11 @@ export default function StudentScan() {
                 <button
                   onClick={startScanning}
                   disabled={!tokenStatus.hasToken}
-                  className={`px-8 py-4 text-base font-semibold rounded-2xl transition-all ${tokenStatus.hasToken ? "bg-indigo-600 text-white hover:bg-indigo-700" : "bg-gray-800 text-gray-400 border border-gray-700 cursor-not-allowed"}`}
+                  className={`px-8 py-4 text-base font-semibold rounded-2xl transition-all ${
+                    tokenStatus.hasToken
+                      ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                      : "bg-gray-800 text-gray-400 border border-gray-700 cursor-not-allowed"
+                  }`}
                 >
                   {tokenStatus.hasToken
                     ? "📱 Start Scanning"
@@ -371,7 +388,9 @@ export default function StudentScan() {
               📚 History ({history.length})
             </span>
             <svg
-              className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${showHistory ? "rotate-180" : ""}`}
+              className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${
+                showHistory ? "rotate-180" : ""
+              }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -384,6 +403,7 @@ export default function StudentScan() {
               />
             </svg>
           </button>
+
           {showHistory && (
             <div className="mt-2 p-4 bg-gray-900/50 border border-gray-800 rounded-2xl">
               {history.length === 0 ? (
