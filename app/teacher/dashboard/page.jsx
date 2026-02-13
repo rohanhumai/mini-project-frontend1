@@ -262,9 +262,9 @@ export default function TeacherDashboard() {
                     >
                       <option value="1">1 minute (max)</option>
                     </select>
-                    <span className="text-amber-400 text-xs whitespace-nowrap">
+                    {/* <span className="text-amber-400 text-xs whitespace-nowrap">
                       ⚠️ Max 1 min
-                    </span>
+                    </span> */}
                   </div>
                 </div>
               </div>
