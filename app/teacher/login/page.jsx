@@ -130,7 +130,7 @@ export default function TeacherLogin() {
             <div className="mt-6 p-4 bg-gray-950/50 rounded-xl border border-gray-800/50">
               <p className="text-xs text-gray-400 text-center">
                 <span className="font-semibold text-gray-300">Demo:</span>{" "}
-                admin@college.edu / admin123
+                shailesh@college.edu / teacher123
               </p>
             </div>
           </div>

@@ -28,16 +28,29 @@ export default function TeacherDashboard() {
     expiryMinutes: 1,
   });
 
+  const handleAuthFailure = useCallback(() => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("teacherData");
+    toast.error("Session expired. Please login again.");
+    router.push("/teacher/login");
+  }, [router]);
+
   const auth = useCallback(() => {
-    const t = localStorage.getItem("token");
+    const t = localStorage.getItem("token")?.trim();
+    if (!t || t === "undefined" || t === "null") {
+      throw new Error("Missing teacher token");
+    }
     return { headers: { Authorization: `Bearer ${t}` } };
   }, []);
 
+  const isAuthError = (err) =>
+    err?.response?.status === 401 || err?.message === "Missing teacher token";
+
   useEffect(() => {
-    const t = localStorage.getItem("token");
+    const t = localStorage.getItem("token")?.trim();
     const d = localStorage.getItem("teacherData");
-    if (!t || !d) {
-      router.push("/login");
+    if (!t || t === "undefined" || t === "null" || !d) {
+      router.push("/teacher/login");
       return;
     }
     setTeacher(JSON.parse(d));
@@ -47,14 +60,17 @@ export default function TeacherDashboard() {
 
   const loadSessions = async () => {
     try {
+      const headers = auth();
       const [a, b] = await Promise.all([
-        axios.get(`${API}/teacher/sessions/active`, auth()),
-        axios.get(`${API}/teacher/sessions/all`, auth()),
+        axios.get(`${API}/teacher/sessions/active`, headers),
+        axios.get(`${API}/teacher/sessions/all`, headers),
       ]);
       setSessions(a.data.sessions || []);
       setAllSessions(b.data.sessions || []);
     } catch (err) {
-      if (err.response?.status === 401) router.push("/login");
+      if (isAuthError(err)) {
+        handleAuthFailure();
+      }
     }
   };
 
@@ -88,6 +104,10 @@ export default function TeacherDashboard() {
         loadSessions();
       }
     } catch (err) {
+      if (isAuthError(err)) {
+        handleAuthFailure();
+        return;
+      }
       toast.error(err.response?.data?.message || "Failed");
     } finally {
       setCreating(false);
@@ -100,7 +120,11 @@ export default function TeacherDashboard() {
       toast.success("Session ended");
       setActiveQR(null);
       loadSessions();
-    } catch {
+    } catch (err) {
+      if (isAuthError(err)) {
+        handleAuthFailure();
+        return;
+      }
       toast.error("Failed");
     }
   };
@@ -113,7 +137,11 @@ export default function TeacherDashboard() {
       );
       setAttendance(res.data.attendance || []);
       setSelectedSession(id);
-    } catch {
+    } catch (err) {
+      if (isAuthError(err)) {
+        handleAuthFailure();
+        return;
+      }
       toast.error("Failed to load attendance");
     }
   };
