@@ -83,7 +83,7 @@ export default function TeacherDashboard() {
       );
       if (res.data.success) {
         setActiveQR(res.data.session);
-        toast.success("Session created! QR code generated.");
+        toast.success("Session created! QR generated.");
         setShowForm(false);
         setForm({
           subject: "",
@@ -96,7 +96,7 @@ export default function TeacherDashboard() {
         fetchAll();
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to create session");
+      toast.error(err.response?.data?.message || "Failed");
     } finally {
       setCreating(false);
     }
@@ -141,11 +141,12 @@ export default function TeacherDashboard() {
     );
   }
 
-  const currentSessions = tab === "active" ? sessions : allSessions;
+  const list = tab === "active" ? sessions : allSessions;
+  const inputClass =
+    "w-full px-4 py-3 bg-gray-950 border border-gray-700 rounded-xl text-gray-100 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all";
 
   return (
     <div className="min-h-screen bg-gray-950">
-      {/* Navbar */}
       <nav className="flex items-center justify-between px-6 py-4 bg-gray-900/80 backdrop-blur-md border-b border-gray-800 sticky top-0 z-50">
         <Link
           href="/"
@@ -168,7 +169,6 @@ export default function TeacherDashboard() {
       </nav>
 
       <div className="max-w-6xl mx-auto px-6 py-8">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-100">
             Teacher Dashboard
@@ -178,34 +178,19 @@ export default function TeacherDashboard() {
           </p>
         </div>
 
-        {/* Create Button */}
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
             className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-all mb-8"
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            Create New Session
+            + Create New Session
           </button>
         )}
 
-        {/* Create Form */}
         {showForm && (
           <div className="p-6 bg-gray-900/50 border border-gray-800 rounded-2xl mb-8">
             <h3 className="text-lg font-bold text-gray-100 mb-6">
-              Create New Attendance Session
+              Create Attendance Session
             </h3>
             <form onSubmit={createSession}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -218,18 +203,17 @@ export default function TeacherDashboard() {
                     onChange={(e) =>
                       setForm({ ...form, subject: e.target.value })
                     }
-                    className="w-full px-4 py-3 bg-gray-950 border border-gray-700 rounded-xl text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+                    className={inputClass}
                     required
                   >
                     <option value="">Select Subject</option>
-                    {teacher?.subjects?.map((sub, i) => (
-                      <option key={i} value={sub}>
-                        {sub}
+                    {teacher?.subjects?.map((s, i) => (
+                      <option key={i} value={s}>
+                        {s}
                       </option>
                     ))}
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Department
@@ -241,10 +225,9 @@ export default function TeacherDashboard() {
                     onChange={(e) =>
                       setForm({ ...form, department: e.target.value })
                     }
-                    className="w-full px-4 py-3 bg-gray-950 border border-gray-700 rounded-xl text-gray-100 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+                    className={inputClass}
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Year
@@ -252,7 +235,7 @@ export default function TeacherDashboard() {
                   <select
                     value={form.year}
                     onChange={(e) => setForm({ ...form, year: e.target.value })}
-                    className="w-full px-4 py-3 bg-gray-950 border border-gray-700 rounded-xl text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+                    className={inputClass}
                   >
                     <option value="">All Years</option>
                     <option value="1">1st Year</option>
@@ -261,22 +244,20 @@ export default function TeacherDashboard() {
                     <option value="4">4th Year</option>
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Section
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g., A, B, C"
+                    placeholder="A, B, C"
                     value={form.section}
                     onChange={(e) =>
                       setForm({ ...form, section: e.target.value })
                     }
-                    className="w-full px-4 py-3 bg-gray-950 border border-gray-700 rounded-xl text-gray-100 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+                    className={inputClass}
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     QR Expiry
@@ -286,47 +267,24 @@ export default function TeacherDashboard() {
                     onChange={(e) =>
                       setForm({ ...form, expiryMinutes: e.target.value })
                     }
-                    className="w-full px-4 py-3 bg-gray-950 border border-gray-700 rounded-xl text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+                    className={inputClass}
                   >
-                    <option value="2">2 minutes</option>
-                    <option value="5">5 minutes</option>
-                    <option value="10">10 minutes</option>
-                    <option value="15">15 minutes</option>
-                    <option value="30">30 minutes</option>
-                    <option value="60">60 minutes</option>
+                    <option value="2">2 min</option>
+                    <option value="5">5 min</option>
+                    <option value="10">10 min</option>
+                    <option value="15">15 min</option>
+                    <option value="30">30 min</option>
+                    <option value="60">60 min</option>
                   </select>
                 </div>
               </div>
-
               <div className="flex gap-3 mt-6">
                 <button
                   type="submit"
                   disabled={creating}
-                  className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-all"
                 >
-                  {creating ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                          fill="none"
-                        />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                        />
-                      </svg>
-                      Creating...
-                    </>
-                  ) : (
-                    "🔄 Generate QR Code"
-                  )}
+                  {creating ? "Creating..." : "🔄 Generate QR"}
                 </button>
                 <button
                   type="button"
@@ -340,12 +298,11 @@ export default function TeacherDashboard() {
           </div>
         )}
 
-        {/* QR Code Display */}
         {activeQR && (
           <div className="p-8 bg-gray-900/50 border border-gray-800 rounded-2xl mb-8">
             <div className="flex flex-col items-center text-center">
               <h3 className="text-xl font-bold text-gray-100 mb-2">
-                📱 Current QR Code
+                📱 QR Code
               </h3>
               <p className="text-gray-400 text-sm mb-4">
                 Subject:{" "}
@@ -353,20 +310,11 @@ export default function TeacherDashboard() {
                   {activeQR.subject}
                 </span>
               </p>
-
-              <div className="bg-white p-4 rounded-2xl shadow-2xl shadow-indigo-600/10 mb-4">
-                <img
-                  src={activeQR.qrImage}
-                  alt="QR Code"
-                  className="w-72 h-72"
-                />
+              <div className="bg-white p-4 rounded-2xl shadow-2xl mb-4">
+                <img src={activeQR.qrImage} alt="QR" className="w-72 h-72" />
               </div>
-
-              {/* Session Code for manual entry */}
               <div className="w-full max-w-md mt-2 mb-4">
-                <p className="text-gray-500 text-xs mb-2">
-                  Session Code (for manual entry):
-                </p>
+                <p className="text-gray-500 text-xs mb-2">Session Code:</p>
                 <div className="flex items-center gap-2">
                   <code className="flex-1 px-4 py-2 bg-gray-950 border border-gray-700 rounded-lg text-indigo-400 text-xs font-mono break-all">
                     {activeQR.sessionCode}
@@ -382,74 +330,58 @@ export default function TeacherDashboard() {
                   </button>
                 </div>
               </div>
-
               <p className="text-gray-500 text-xs mb-6">
-                Expires at: {new Date(activeQR.expiresAt).toLocaleTimeString()}
+                Expires: {new Date(activeQR.expiresAt).toLocaleTimeString()}
               </p>
-
               <div className="flex gap-3">
                 <button
                   onClick={() => viewAttendance(activeQR.id)}
                   className="px-5 py-2.5 text-sm font-semibold text-gray-200 bg-gray-800 border border-gray-700 rounded-xl hover:bg-gray-700 transition-all"
                 >
-                  📊 View Attendance
+                  📊 Attendance
                 </button>
                 <button
                   onClick={() => endSession(activeQR.id)}
                   className="px-5 py-2.5 text-sm font-semibold text-white bg-red-600 rounded-xl hover:bg-red-700 transition-all"
                 >
-                  ⏹ End Session
+                  ⏹ End
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Tabs */}
         <div className="flex gap-2 mb-6">
-          <button
-            onClick={() => {
-              setTab("active");
-              setSelectedSession(null);
-            }}
-            className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-              tab === "active"
-                ? "bg-indigo-600 text-white"
-                : "bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700"
-            }`}
-          >
-            Active Sessions ({sessions.length})
-          </button>
-          <button
-            onClick={() => {
-              setTab("history");
-              setSelectedSession(null);
-            }}
-            className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-              tab === "history"
-                ? "bg-indigo-600 text-white"
-                : "bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700"
-            }`}
-          >
-            All Sessions ({allSessions.length})
-          </button>
+          {["active", "history"].map((t) => (
+            <button
+              key={t}
+              onClick={() => {
+                setTab(t);
+                setSelectedSession(null);
+              }}
+              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${tab === t ? "bg-indigo-600 text-white" : "bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700"}`}
+            >
+              {t === "active"
+                ? `Active (${sessions.length})`
+                : `All (${allSessions.length})`}
+            </button>
+          ))}
         </div>
 
-        {/* Sessions */}
         <div className="space-y-4">
-          {currentSessions.length === 0 ? (
+          {list.length === 0 ? (
             <div className="p-12 bg-gray-900/50 border border-gray-800 rounded-2xl text-center">
               <div className="text-5xl mb-4">📭</div>
               <h3 className="text-lg font-bold text-gray-100 mb-2">
-                No sessions found
+                No sessions
               </h3>
               <p className="text-gray-400 text-sm">
-                Create a new session to generate a QR code
+                Create a session to get started
               </p>
             </div>
           ) : (
-            currentSessions.map((s) => {
-              const isActive = s.isActive && new Date(s.expiresAt) > new Date();
+            list.map((s) => {
+              const active = s.isActive && new Date(s.expiresAt) > new Date();
               return (
                 <div
                   key={s._id}
@@ -460,34 +392,27 @@ export default function TeacherDashboard() {
                       {s.subject}
                     </h4>
                     <p className="text-gray-400 text-xs mt-1">
-                      {s.department} •{" "}
-                      {new Date(s.createdAt).toLocaleDateString()}{" "}
-                      {new Date(s.createdAt).toLocaleTimeString()}
+                      {s.department} • {new Date(s.createdAt).toLocaleString()}
                     </p>
                     <div className="flex gap-2 mt-3">
                       <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${
-                          isActive
-                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                            : "bg-red-500/10 text-red-400 border-red-500/20"
-                        }`}
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"}`}
                       >
-                        {isActive ? "🟢 Active" : "🔴 Ended"}
+                        {active ? "🟢 Active" : "🔴 Ended"}
                       </span>
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                        👥 {s.attendanceCount || 0} present
+                        👥 {s.attendanceCount || 0}
                       </span>
                     </div>
                   </div>
-
                   <div className="flex gap-2">
                     <button
                       onClick={() => viewAttendance(s._id)}
                       className="px-4 py-2 text-xs font-semibold text-gray-200 bg-gray-800 border border-gray-700 rounded-xl hover:bg-gray-700 transition-all"
                     >
-                      📋 Attendance
+                      📋 View
                     </button>
-                    {isActive && (
+                    {active && (
                       <button
                         onClick={() => endSession(s._id)}
                         className="px-4 py-2 text-xs font-semibold text-white bg-red-600 rounded-xl hover:bg-red-700 transition-all"
@@ -502,12 +427,11 @@ export default function TeacherDashboard() {
           )}
         </div>
 
-        {/* Attendance Table */}
         {selectedSession && (
           <div className="p-6 bg-gray-900/50 border border-gray-800 rounded-2xl mt-8">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-gray-100">
-                📊 Attendance List ({attendance.length} students)
+                📊 Attendance ({attendance.length})
               </h3>
               <button
                 onClick={() => {
@@ -516,14 +440,13 @@ export default function TeacherDashboard() {
                 }}
                 className="px-3 py-1.5 text-xs font-semibold text-gray-200 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 transition-all"
               >
-                ✕ Close
+                ✕
               </button>
             </div>
-
             {attendance.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-400">No attendance recorded yet</p>
-              </div>
+              <p className="text-center text-gray-400 py-12">
+                No attendance yet
+              </p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">

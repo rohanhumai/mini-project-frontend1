@@ -5,7 +5,6 @@ import Link from "next/link";
 export default function Home() {
   return (
     <div className="min-h-screen bg-gray-950">
-      {/* Navbar */}
       <nav className="flex items-center justify-between px-6 py-4 bg-gray-900/80 backdrop-blur-md border-b border-gray-800 sticky top-0 z-50">
         <Link
           href="/"
@@ -14,7 +13,6 @@ export default function Home() {
           <span className="text-2xl">📋</span>
           QR Attendance
         </Link>
-
         <div className="flex items-center gap-3">
           <Link
             href="/teacher/login"
@@ -31,9 +29,7 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Hero */}
       <div className="max-w-5xl mx-auto px-6 text-center py-24">
-        {/* Badge */}
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-8">
           <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
           Anti-Proxy Attendance System
@@ -70,29 +66,28 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Features */}
       <div className="max-w-5xl mx-auto px-6 pb-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             {
               icon: "📱",
-              title: "QR Code Scanning",
-              desc: "Scan QR codes from your phone camera to mark attendance instantly.",
+              title: "QR Scanning",
+              desc: "Scan QR codes to mark attendance instantly.",
             },
             {
               icon: "🔒",
               title: "Anti-Proxy",
-              desc: "Each student gets 1 token per hour. Prevents proxy completely.",
+              desc: "1 token per hour prevents proxy attendance.",
             },
             {
               icon: "⚡",
               title: "Redis Powered",
-              desc: "Lightning-fast with Redis caching and DDoS rate limiting.",
+              desc: "Fast caching and DDoS rate limiting.",
             },
             {
               icon: "📊",
               title: "Real-time",
-              desc: "Teachers see attendance update in real-time as students scan.",
+              desc: "Live attendance tracking for teachers.",
             },
           ].map((f, i) => (
             <div
@@ -110,7 +105,6 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Demo Credentials */}
         <div className="max-w-md mx-auto mt-16">
           <div className="p-6 bg-gray-900/50 border border-gray-800 rounded-2xl text-center">
             <h3 className="text-lg font-bold text-gray-100 mb-3">
@@ -130,13 +124,6 @@ export default function Home() {
                 </code>
               </p>
             </div>
-            <p className="text-gray-500 text-xs mt-3">
-              Run{" "}
-              <code className="bg-gray-950 px-2 py-0.5 rounded font-mono">
-                npm run seed
-              </code>{" "}
-              in backend first
-            </p>
           </div>
         </div>
       </div>
