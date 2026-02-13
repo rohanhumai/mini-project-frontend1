@@ -3,13 +3,13 @@ import { Toaster } from "react-hot-toast";
 
 export const metadata = {
   title: "QR Attendance System",
-  description: "Smart QR Code Attendance System",
+  description: "Smart QR Code Based Attendance System",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="bg-gray-950 text-gray-100 min-h-screen font-sans antialiased">
+      <body className="bg-gray-950 text-gray-100 min-h-screen font-sans">
         <Toaster
           position="top-right"
           toastOptions={{
