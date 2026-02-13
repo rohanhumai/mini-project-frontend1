@@ -25,7 +25,7 @@ export default function TeacherDashboard() {
     department: "",
     year: "",
     section: "",
-    expiryMinutes: 1,
+    expiryMinutes: 5,
   });
 
   const auth = useCallback(() => {
@@ -83,7 +83,7 @@ export default function TeacherDashboard() {
           department: "",
           year: "",
           section: "",
-          expiryMinutes: 1,
+          expiryMinutes: 5,
         });
         loadSessions();
       }
