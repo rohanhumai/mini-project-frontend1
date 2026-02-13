@@ -25,7 +25,7 @@ export default function TeacherDashboard() {
     department: "",
     year: "",
     section: "",
-    expiryMinutes: 1,
+    expiryMinutes: 5,
   });
 
   const auth = useCallback(() => {
@@ -83,7 +83,7 @@ export default function TeacherDashboard() {
           department: "",
           year: "",
           section: "",
-          expiryMinutes: 1,
+          expiryMinutes: 5,
         });
         loadSessions();
       }
@@ -260,10 +260,10 @@ export default function TeacherDashboard() {
                       }
                       className={ic}
                     >
-                      <option value="1">1 minute (max)</option>
+                      <option value="1">5 minute</option>
                     </select>
                     <span className="text-amber-400 text-xs whitespace-nowrap">
-                      ⚠️ Max 1 min
+                      ⚠️ Max 5 min
                     </span>
                   </div>
                 </div>
@@ -301,7 +301,7 @@ export default function TeacherDashboard() {
                 </span>
               </p>
               <p className="text-amber-400 text-xs mb-4">
-                ⚠️ Expires in 1 minute!
+                ⚠️ Expires in 5 minute!
               </p>
               <div className="bg-white p-4 rounded-2xl shadow-2xl mb-4">
                 <img src={activeQR.qrImage} alt="QR" className="w-72 h-72" />
