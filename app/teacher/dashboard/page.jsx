@@ -300,9 +300,9 @@ export default function TeacherDashboard() {
                   {activeQR.subject}
                 </span>
               </p>
-              <p className="text-amber-400 text-xs mb-4">
+              {/* <p className="text-amber-400 text-xs mb-4">
                 ⚠️ Expires in 1 minute!
-              </p>
+              </p> */}
               <div className="bg-white p-4 rounded-2xl shadow-2xl mb-4">
                 <img src={activeQR.qrImage} alt="QR" className="w-72 h-72" />
               </div>
