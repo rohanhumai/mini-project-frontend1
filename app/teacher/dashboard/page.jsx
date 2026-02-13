@@ -260,7 +260,7 @@ export default function TeacherDashboard() {
                       }
                       className={ic}
                     >
-                      <option value="1">1 minute (max)</option>
+                      <option value="1">5 minutes</option>
                     </select>
                     {/* <span className="text-amber-400 text-xs whitespace-nowrap">
                       ⚠️ Max 1 min
