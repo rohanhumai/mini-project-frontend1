@@ -25,7 +25,7 @@ export default function TeacherDashboard() {
     department: "",
     year: "",
     section: "",
-    expiryMinutes: 5,
+    expiryMinutes: 1,
   });
 
   const auth = useCallback(() => {
@@ -37,7 +37,7 @@ export default function TeacherDashboard() {
     const t = localStorage.getItem("token");
     const d = localStorage.getItem("teacherData");
     if (!t || !d) {
-      router.push("/teacher/login");
+      router.push("/login");
       return;
     }
     setTeacher(JSON.parse(d));
@@ -47,14 +47,14 @@ export default function TeacherDashboard() {
 
   const loadSessions = async () => {
     try {
-      const [activeRes, allRes] = await Promise.all([
+      const [a, b] = await Promise.all([
         axios.get(`${API}/teacher/sessions/active`, auth()),
         axios.get(`${API}/teacher/sessions/all`, auth()),
       ]);
-      setSessions(activeRes.data.sessions || []);
-      setAllSessions(allRes.data.sessions || []);
+      setSessions(a.data.sessions || []);
+      setAllSessions(b.data.sessions || []);
     } catch (err) {
-      if (err.response?.status === 401) router.push("/teacher/login");
+      if (err.response?.status === 401) router.push("/login");
     }
   };
 
@@ -74,14 +74,16 @@ export default function TeacherDashboard() {
       );
       if (res.data.success) {
         setActiveQR(res.data.session);
-        toast.success("QR Code generated!");
+        toast.success(
+          `QR generated! Expires in ${res.data.session.expiryMinutes} min.`,
+        );
         setShowForm(false);
         setForm({
           subject: "",
           department: "",
           year: "",
           section: "",
-          expiryMinutes: 5,
+          expiryMinutes: 1,
         });
         loadSessions();
       }
@@ -98,7 +100,7 @@ export default function TeacherDashboard() {
       toast.success("Session ended");
       setActiveQR(null);
       loadSessions();
-    } catch (err) {
+    } catch {
       toast.error("Failed");
     }
   };
@@ -111,7 +113,7 @@ export default function TeacherDashboard() {
       );
       setAttendance(res.data.attendance || []);
       setSelectedSession(id);
-    } catch (err) {
+    } catch {
       toast.error("Failed to load attendance");
     }
   };
@@ -136,14 +138,12 @@ export default function TeacherDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-950">
-      {/* Navbar */}
       <nav className="flex items-center justify-between px-6 py-4 bg-gray-900/80 backdrop-blur-md border-b border-gray-800 sticky top-0 z-50">
         <Link
           href="/"
           className="text-xl font-bold text-indigo-400 flex items-center gap-2"
         >
-          <span className="text-2xl">📋</span>
-          QR Attendance
+          <span className="text-2xl">📋</span> QR Attendance
         </Link>
         <div className="flex items-center gap-3">
           <span className="text-gray-400 text-sm hidden sm:block">
@@ -159,7 +159,6 @@ export default function TeacherDashboard() {
       </nav>
 
       <div className="max-w-6xl mx-auto px-6 py-8">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-100">
             Teacher Dashboard
@@ -169,7 +168,6 @@ export default function TeacherDashboard() {
           </p>
         </div>
 
-        {/* Create Button */}
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
@@ -179,7 +177,6 @@ export default function TeacherDashboard() {
           </button>
         )}
 
-        {/* Create Form */}
         {showForm && (
           <div className="p-6 bg-gray-900/50 border border-gray-800 rounded-2xl mb-8">
             <h3 className="text-lg font-bold text-gray-100 mb-6">
@@ -255,20 +252,20 @@ export default function TeacherDashboard() {
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     QR Expiry
                   </label>
-                  <select
-                    value={form.expiryMinutes}
-                    onChange={(e) =>
-                      setForm({ ...form, expiryMinutes: e.target.value })
-                    }
-                    className={ic}
-                  >
-                    <option value="2">2 min</option>
-                    <option value="5">5 min</option>
-                    <option value="10">10 min</option>
-                    <option value="15">15 min</option>
-                    <option value="30">30 min</option>
-                    <option value="60">60 min</option>
-                  </select>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={form.expiryMinutes}
+                      onChange={(e) =>
+                        setForm({ ...form, expiryMinutes: e.target.value })
+                      }
+                      className={ic}
+                    >
+                      <option value="1">1 minute (max)</option>
+                    </select>
+                    <span className="text-amber-400 text-xs whitespace-nowrap">
+                      ⚠️ Max 1 min
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="flex gap-3 mt-6">
@@ -291,24 +288,24 @@ export default function TeacherDashboard() {
           </div>
         )}
 
-        {/* QR Code */}
         {activeQR && (
           <div className="p-8 bg-gray-900/50 border border-gray-800 rounded-2xl mb-8">
             <div className="flex flex-col items-center text-center">
               <h3 className="text-xl font-bold text-gray-100 mb-2">
                 📱 QR Code
               </h3>
-              <p className="text-gray-400 text-sm mb-4">
+              <p className="text-gray-400 text-sm mb-1">
                 Subject:{" "}
                 <span className="text-indigo-400 font-semibold">
                   {activeQR.subject}
                 </span>
               </p>
+              <p className="text-amber-400 text-xs mb-4">
+                ⚠️ Expires in 1 minute!
+              </p>
               <div className="bg-white p-4 rounded-2xl shadow-2xl mb-4">
                 <img src={activeQR.qrImage} alt="QR" className="w-72 h-72" />
               </div>
-
-              {/* Session Code */}
               <div className="w-full max-w-md mt-2 mb-4">
                 <p className="text-gray-500 text-xs mb-2">Session Code:</p>
                 <div className="flex items-center gap-2">
@@ -326,7 +323,6 @@ export default function TeacherDashboard() {
                   </button>
                 </div>
               </div>
-
               <p className="text-gray-500 text-xs mb-6">
                 Expires: {new Date(activeQR.expiresAt).toLocaleTimeString()}
               </p>
@@ -348,7 +344,6 @@ export default function TeacherDashboard() {
           </div>
         )}
 
-        {/* Tabs */}
         <div className="flex gap-2 mb-6">
           {["active", "history"].map((t) => (
             <button
@@ -357,11 +352,7 @@ export default function TeacherDashboard() {
                 setTab(t);
                 setSelectedSession(null);
               }}
-              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                tab === t
-                  ? "bg-indigo-600 text-white"
-                  : "bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700"
-              }`}
+              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${tab === t ? "bg-indigo-600 text-white" : "bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700"}`}
             >
               {t === "active"
                 ? `Active (${sessions.length})`
@@ -370,7 +361,6 @@ export default function TeacherDashboard() {
           ))}
         </div>
 
-        {/* Sessions List */}
         <div className="space-y-4">
           {list.length === 0 ? (
             <div className="p-12 bg-gray-900/50 border border-gray-800 rounded-2xl text-center">
@@ -399,11 +389,7 @@ export default function TeacherDashboard() {
                     </p>
                     <div className="flex gap-2 mt-3">
                       <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${
-                          active
-                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                            : "bg-red-500/10 text-red-400 border-red-500/20"
-                        }`}
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"}`}
                       >
                         {active ? "🟢 Active" : "🔴 Ended"}
                       </span>
@@ -434,7 +420,6 @@ export default function TeacherDashboard() {
           )}
         </div>
 
-        {/* Attendance Table */}
         {selectedSession && (
           <div className="p-6 bg-gray-900/50 border border-gray-800 rounded-2xl mt-8">
             <div className="flex justify-between items-center mb-6">

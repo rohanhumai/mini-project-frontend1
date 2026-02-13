@@ -80,17 +80,17 @@ export default function Home() {
             {
               icon: "🔒",
               title: "Anti-Proxy",
-              desc: "1 token per hour prevents proxy attendance.",
+              desc: "1 token per hour + device lock prevents proxy.",
+            },
+            {
+              icon: "🖥️",
+              title: "Device Lock",
+              desc: "Each account locked to one device only.",
             },
             {
               icon: "⚡",
               title: "Redis Powered",
               desc: "Fast caching and DDoS rate limiting.",
-            },
-            {
-              icon: "📊",
-              title: "Real-time",
-              desc: "Live attendance tracking for teachers.",
             },
           ].map((f, i) => (
             <div

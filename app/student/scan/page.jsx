@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { getFingerprint, getStudentHeaders } from "../../utils/fingerprint";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
@@ -22,12 +23,12 @@ export default function StudentScan() {
   const [showHistory, setShowHistory] = useState(false);
   const [manualCode, setManualCode] = useState("");
   const [manualLoading, setManualLoading] = useState(false);
+  const [deviceId, setDeviceId] = useState(null);
   const scannerRef = useRef(null);
   const qrRef = useRef(null);
 
-  const auth = useCallback(() => {
-    const t = localStorage.getItem("studentToken");
-    return { headers: { Authorization: `Bearer ${t}` } };
+  const auth = useCallback(async () => {
+    return await getStudentHeaders();
   }, []);
 
   useEffect(() => {
@@ -38,12 +39,16 @@ export default function StudentScan() {
       return;
     }
     setStudent(JSON.parse(d));
-    fetchToken();
-    fetchHistory();
-    setLoading(false);
+    const init = async () => {
+      const fp = await getFingerprint();
+      setDeviceId(fp);
+      await fetchToken();
+      await fetchHistory();
+      setLoading(false);
+    };
+    init();
   }, [router]);
 
-  // Cooldown timer
   useEffect(() => {
     if (tokenStatus.cooldownRemaining > 0) {
       const timer = setInterval(() => {
@@ -60,7 +65,8 @@ export default function StudentScan() {
 
   const fetchToken = async () => {
     try {
-      const res = await axios.get(`${API}/student/token-status`, auth());
+      const h = await auth();
+      const res = await axios.get(`${API}/student/token-status`, h);
       setTokenStatus(res.data);
     } catch (err) {
       console.error(err);
@@ -69,7 +75,8 @@ export default function StudentScan() {
 
   const fetchHistory = async () => {
     try {
-      const res = await axios.get(`${API}/attendance/my-attendance`, auth());
+      const h = await auth();
+      const res = await axios.get(`${API}/attendance/my-attendance`, h);
       setHistory(res.data.attendance || []);
     } catch (err) {
       console.error(err);
@@ -101,7 +108,7 @@ export default function StudentScan() {
       }
     } catch (err) {
       console.error(err);
-      toast.error("Camera error. Check permissions.");
+      toast.error("Camera error.");
       setScanning(false);
     }
   };
@@ -131,6 +138,10 @@ export default function StudentScan() {
         toast.error("Invalid QR format");
         return;
       }
+      if (parsed.expiresAt && new Date(parsed.expiresAt) < new Date()) {
+        toast.error("This QR code has expired! Ask teacher for new one.");
+        return;
+      }
       await markAttendance(parsed.sessionCode);
     } catch (err) {
       handleErr(err);
@@ -138,10 +149,11 @@ export default function StudentScan() {
   };
 
   const markAttendance = async (code) => {
+    const h = await auth();
     const res = await axios.post(
       `${API}/attendance/mark`,
       { sessionCode: code },
-      auth(),
+      h,
     );
     if (res.data.success) {
       setSuccess(res.data.attendance);
@@ -166,7 +178,14 @@ export default function StudentScan() {
   };
 
   const handleErr = (err) => {
-    toast.error(err.response?.data?.message || "Failed");
+    const msg = err.response?.data?.message || "Failed";
+    if (err.response?.data?.registeredDevice) {
+      toast.error("❌ Wrong device! Account locked to another device.", {
+        duration: 6000,
+      });
+    } else {
+      toast.error(msg);
+    }
     if (err.response?.data?.cooldownRemaining) {
       setTokenStatus({
         hasToken: false,
@@ -180,7 +199,6 @@ export default function StudentScan() {
     const sc = s % 60;
     return `${m}m ${sc < 10 ? "0" : ""}${sc}s`;
   };
-
   const logout = () => {
     stopScanning();
     localStorage.removeItem("studentToken");
@@ -188,31 +206,25 @@ export default function StudentScan() {
     router.push("/");
   };
 
-  if (loading) {
+  if (loading)
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-950">
         <div className="w-10 h-10 border-4 border-gray-700 border-t-indigo-500 rounded-full animate-spin" />
       </div>
     );
-  }
 
   return (
     <div className="min-h-screen bg-gray-950">
-      {/* Navbar */}
       <nav className="flex items-center justify-between px-6 py-4 bg-gray-900/80 backdrop-blur-md border-b border-gray-800 sticky top-0 z-50">
         <Link
           href="/"
           className="text-xl font-bold text-indigo-400 flex items-center gap-2"
         >
-          <span className="text-2xl">📋</span>QR Attendance
+          <span className="text-2xl">📋</span> QR Attendance
         </Link>
         <div className="flex items-center gap-3">
           <div
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border ${
-              tokenStatus.hasToken
-                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                : "bg-amber-500/10 text-amber-400 border-amber-500/20"
-            }`}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border ${tokenStatus.hasToken ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20"}`}
           >
             {tokenStatus.hasToken
               ? "🟢 Token Ready"
@@ -228,7 +240,6 @@ export default function StudentScan() {
       </nav>
 
       <div className="max-w-xl mx-auto px-6 py-8">
-        {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-100">
             📱 Scan Attendance
@@ -236,29 +247,27 @@ export default function StudentScan() {
           <p className="text-gray-400 text-sm mt-1">
             {student?.name} • {student?.rollNumber} • {student?.department}
           </p>
+          {deviceId && (
+            <p className="text-gray-600 text-xs mt-1">
+              🔒 Device: {deviceId.substring(0, 8)}...
+            </p>
+          )}
         </div>
 
-        {/* Token Status */}
         <div
-          className={`p-5 bg-gray-900/50 border rounded-2xl mb-6 border-l-4 ${
-            tokenStatus.hasToken
-              ? "border-gray-800 border-l-emerald-500"
-              : "border-gray-800 border-l-amber-500"
-          }`}
+          className={`p-5 bg-gray-900/50 border rounded-2xl mb-6 border-l-4 ${tokenStatus.hasToken ? "border-gray-800 border-l-emerald-500" : "border-gray-800 border-l-amber-500"}`}
         >
           <div className="flex justify-between items-center">
             <div>
               <h4 className="text-sm font-bold text-gray-100">Token Status</h4>
               <p className="text-gray-400 text-xs mt-1">
                 {tokenStatus.hasToken
-                  ? "Token available. Scan a QR code."
+                  ? "Token available. Scan QR code."
                   : `Cooldown: ${fmt(tokenStatus.cooldownRemaining)}`}
               </p>
             </div>
             <div
-              className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl ${
-                tokenStatus.hasToken ? "bg-emerald-500/10" : "bg-amber-500/10"
-              }`}
+              className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl ${tokenStatus.hasToken ? "bg-emerald-500/10" : "bg-amber-500/10"}`}
             >
               {tokenStatus.hasToken ? "✅" : "⏳"}
             </div>
@@ -269,9 +278,7 @@ export default function StudentScan() {
                 <div
                   className="bg-amber-500 h-2 rounded-full transition-all duration-1000"
                   style={{
-                    width: `${
-                      ((3600 - tokenStatus.cooldownRemaining) / 3600) * 100
-                    }%`,
+                    width: `${((3600 - tokenStatus.cooldownRemaining) / 3600) * 100}%`,
                   }}
                 />
               </div>
@@ -282,7 +289,6 @@ export default function StudentScan() {
           )}
         </div>
 
-        {/* Success */}
         {success && (
           <div className="p-8 bg-gray-900/50 border border-gray-800 rounded-2xl mb-6 text-center">
             <div className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center text-4xl text-white mx-auto mb-4 animate-bounce">
@@ -309,7 +315,6 @@ export default function StudentScan() {
           </div>
         )}
 
-        {/* Scanner */}
         {!success && (
           <div className="bg-gray-900/50 border border-gray-800 rounded-2xl overflow-hidden mb-6">
             {!scanning ? (
@@ -320,17 +325,16 @@ export default function StudentScan() {
                 <h3 className="text-lg font-bold text-gray-100 mb-2">
                   Ready to Scan
                 </h3>
-                <p className="text-gray-400 text-sm mb-8 max-w-xs mx-auto">
-                  Point camera at the QR code from your teacher
+                <p className="text-gray-400 text-sm mb-2 max-w-xs mx-auto">
+                  Point camera at teacher&apos;s QR code
+                </p>
+                <p className="text-amber-400 text-xs mb-8">
+                  ⚠️ QR codes expire in 1 minute!
                 </p>
                 <button
                   onClick={startScanning}
                   disabled={!tokenStatus.hasToken}
-                  className={`px-8 py-4 text-base font-semibold rounded-2xl transition-all ${
-                    tokenStatus.hasToken
-                      ? "bg-indigo-600 text-white hover:bg-indigo-700"
-                      : "bg-gray-800 text-gray-400 border border-gray-700 cursor-not-allowed"
-                  }`}
+                  className={`px-8 py-4 text-base font-semibold rounded-2xl transition-all ${tokenStatus.hasToken ? "bg-indigo-600 text-white hover:bg-indigo-700" : "bg-gray-800 text-gray-400 border border-gray-700 cursor-not-allowed"}`}
                 >
                   {tokenStatus.hasToken
                     ? "📱 Start Scanning"
@@ -353,7 +357,6 @@ export default function StudentScan() {
           </div>
         )}
 
-        {/* Manual Entry */}
         {!success && !scanning && tokenStatus.hasToken && (
           <div className="p-5 bg-gray-900/50 border border-gray-800 rounded-2xl mb-6">
             <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
@@ -378,7 +381,6 @@ export default function StudentScan() {
           </div>
         )}
 
-        {/* History */}
         <div>
           <button
             onClick={() => setShowHistory(!showHistory)}
@@ -388,9 +390,7 @@ export default function StudentScan() {
               📚 History ({history.length})
             </span>
             <svg
-              className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${
-                showHistory ? "rotate-180" : ""
-              }`}
+              className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${showHistory ? "rotate-180" : ""}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -403,7 +403,6 @@ export default function StudentScan() {
               />
             </svg>
           </button>
-
           {showHistory && (
             <div className="mt-2 p-4 bg-gray-900/50 border border-gray-800 rounded-2xl">
               {history.length === 0 ? (
