@@ -306,7 +306,7 @@ export default function TeacherDashboard() {
               <div className="bg-white p-4 rounded-2xl shadow-2xl mb-4">
                 <img src={activeQR.qrImage} alt="QR" className="w-72 h-72" />
               </div>
-              <div className="w-full max-w-md mt-2 mb-4">
+              {/* <div className="w-full max-w-md mt-2 mb-4">
                 <p className="text-gray-500 text-xs mb-2">Session Code:</p>
                 <div className="flex items-center gap-2">
                   <code className="flex-1 px-4 py-2 bg-gray-950 border border-gray-700 rounded-lg text-indigo-400 text-xs font-mono break-all">
@@ -322,7 +322,7 @@ export default function TeacherDashboard() {
                     📋
                   </button>
                 </div>
-              </div>
+              </div> */}
               <p className="text-gray-500 text-xs mb-6">
                 Expires: {new Date(activeQR.expiresAt).toLocaleTimeString()}
               </p>
